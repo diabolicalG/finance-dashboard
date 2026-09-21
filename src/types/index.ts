@@ -1,5 +1,6 @@
 export type TransactionType = 'income' | 'expense';
 export type BudgetPeriod = 'weekly' | 'monthly' | 'yearly';
+export type CurrencyCode = 'KES' | 'USD' | 'EUR';
 
 export interface Category {
   id: string;
@@ -39,8 +40,7 @@ export interface SavingsGoal {
 }
 
 export interface AppSettings {
-  darkMode: boolean;
-  currency: 'KES' | 'USD' | 'EUR';
+  currency: CurrencyCode;
   monthlyBudget: number;
 }
 

@@ -14,6 +14,7 @@ import {
   DollarSign,
   PiggyBank,
   Settings,
+  Tags,
 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Expenses from './pages/Expenses';
@@ -32,7 +33,7 @@ const navItems: { key: Page; label: string; icon: React.ElementType }[] = [
   { key: 'expenses', label: 'Expenses', icon: Receipt },
   { key: 'budgets', label: 'Budgets', icon: PiggyBank },
   { key: 'savings', label: 'Savings', icon: Target },
-  { key: 'categories', label: 'Categories', icon: BarChart3 },
+  { key: 'categories', label: 'Categories', icon: Tags },
   { key: 'charts', label: 'Analytics', icon: BarChart3 },
   { key: 'settings', label: 'Settings', icon: Settings },
 ];

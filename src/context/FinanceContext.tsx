@@ -3,6 +3,7 @@ import type { Transaction, Category, Budget, SavingsGoal, AppSettings } from '..
 import { loadFinanceData, saveFinanceData, loadSettings, saveSettings, exportAllData, importAllData } from '../db/database';
 import { seedDefaultCategories } from '../utils/seedCategories';
 import { generateId } from '../utils/validation';
+import { formatCurrency, getCurrencySymbol } from '../utils/currency';
 
 interface FinanceContextType {
   transactions: Transaction[];
@@ -14,7 +15,8 @@ interface FinanceContextType {
   addTransaction: (data: Omit<Transaction, 'id' | 'createdAt'>) => void;
   deleteTransaction: (id: string) => void;
   addCategory: (data: Omit<Category, 'id'>) => void;
-  deleteCategory: (id: string) => void;
+  /** Returns false (and leaves the category untouched) if it's still referenced by a transaction or budget. */
+  deleteCategory: (id: string) => boolean;
   addBudget: (data: Omit<Budget, 'id' | 'createdAt'>) => void;
   deleteBudget: (id: string) => void;
   addSavingsGoal: (data: Omit<SavingsGoal, 'id'>) => void;
@@ -23,12 +25,13 @@ interface FinanceContextType {
   updateSettings: (data: Partial<AppSettings>) => void;
   exportData: () => Promise<string>;
   importData: (json: string) => Promise<boolean>;
+  formatAmount: (amount: number) => string;
+  currencySymbol: string;
 }
 
 const FinanceContext = createContext<FinanceContextType | null>(null);
 
 const defaultSettings: AppSettings = {
-  darkMode: false,
   currency: 'KES',
   monthlyBudget: 0,
 };
@@ -104,8 +107,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deleteCategory = useCallback((id: string) => {
+    const inUse = transactions.some((t) => t.category === id) || budgets.some((b) => b.category === id);
+    if (inUse) return false;
     setCategories((prev) => prev.filter((c) => c.id !== id));
-  }, []);
+    return true;
+  }, [transactions, budgets]);
 
   const addBudget = useCallback((data: Omit<Budget, 'id' | 'createdAt'>) => {
     const b: Budget = { ...data, id: generateId('budget'), createdAt: Date.now() };
@@ -136,6 +142,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       return next;
     });
   }, [persistSettings]);
+
+  const formatAmount = useCallback((amount: number) => formatCurrency(amount, settings.currency), [settings.currency]);
 
   const exportData = useCallback(async () => exportAllData(), []);
   const importData = useCallback(async (json: string) => {
@@ -175,6 +183,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         updateSettings,
         exportData,
         importData,
+        formatAmount,
+        currencySymbol: getCurrencySymbol(settings.currency),
       }}
     >
       {children}

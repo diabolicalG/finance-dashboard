@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Plus, Trash2 } from 'lucide-react';
 import type { TransactionType } from '../types';
-
-const iconOptions = ['utensils', 'bus', 'shopping-bag', 'film', 'zap', 'heart', 'dollar-sign', 'laptop', 'trending-up', 'wallet', 'credit-card', 'gift', 'home', 'book', 'music'];
+import { CategoryIcon, iconOptions } from '../utils/categoryIcons';
 
 export default function Categories() {
   const { categories, addCategory, deleteCategory } = useFinance();
@@ -20,6 +19,12 @@ export default function Categories() {
     setIcon('utensils');
     setColor('#3b82f6');
     setShowAdd(false);
+  };
+
+  const handleDelete = (id: string, catName: string) => {
+    if (!confirm(`Delete category "${catName}"?`)) return;
+    const ok = deleteCategory(id);
+    if (!ok) alert(`"${catName}" is still used by existing transactions or budgets. Reassign or remove those first.`);
   };
 
   const expenseCats = categories.filter((c) => c.type === 'expense');
@@ -69,7 +74,7 @@ export default function Categories() {
               className="input-field"
             >
               {iconOptions.map((i) => (
-                <option key={i} value={i}>{i}</option>
+                <option key={i} value={i}>{i.replace('-', ' ')}</option>
               ))}
             </select>
             <input
@@ -78,6 +83,13 @@ export default function Categories() {
               onChange={(e) => setColor(e.target.value)}
               className="input-field h-10 cursor-pointer"
             />
+          </div>
+          <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-[var(--bg-secondary)]">
+            <span className="text-xs text-[var(--text-muted)]">Preview:</span>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}20`, color }}>
+              <CategoryIcon icon={icon} size={18} />
+            </div>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{name || 'Category name'}</span>
           </div>
           <div className="flex gap-3 mt-4">
             <button onClick={handleAdd} className="btn-primary">Add Category</button>
@@ -100,8 +112,8 @@ export default function Categories() {
           {expenseCats.map((cat) => (
             <div key={cat.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${cat.color}20` }}>
-                  <span className="text-lg">{cat.icon}</span>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
+                  <CategoryIcon icon={cat.icon} size={18} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">{cat.name}</p>
@@ -109,7 +121,7 @@ export default function Categories() {
                 </div>
               </div>
               <button
-                onClick={() => deleteCategory(cat.id)}
+                onClick={() => handleDelete(cat.id, cat.name)}
                 className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
               >
                 <Trash2 size={16} />
@@ -128,8 +140,8 @@ export default function Categories() {
           {incomeCats.map((cat) => (
             <div key={cat.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${cat.color}20` }}>
-                  <span className="text-lg">{cat.icon}</span>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
+                  <CategoryIcon icon={cat.icon} size={18} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">{cat.name}</p>
@@ -137,7 +149,7 @@ export default function Categories() {
                 </div>
               </div>
               <button
-                onClick={() => deleteCategory(cat.id)}
+                onClick={() => handleDelete(cat.id, cat.name)}
                 className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
               >
                 <Trash2 size={16} />

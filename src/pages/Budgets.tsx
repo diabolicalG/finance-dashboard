@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Plus, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
-import { formatKSh } from '../utils/currency';
 import { calcBudgetSpent } from '../utils/calculations';
+import { CategoryIcon } from '../utils/categoryIcons';
 import type { BudgetPeriod } from '../types';
 
 export default function Budgets() {
-  const { budgets, categories, transactions, addBudget, deleteBudget } = useFinance();
+  const { budgets, categories, transactions, addBudget, deleteBudget, formatAmount, currencySymbol } = useFinance();
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
@@ -49,7 +49,7 @@ export default function Budgets() {
             />
             <input
               type="number"
-              placeholder="Amount (KSh)"
+              placeholder={`Amount (${currencySymbol})`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="input-field"
@@ -87,17 +87,20 @@ export default function Budgets() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                    style={{ backgroundColor: isOverBudget ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' }}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{
+                      backgroundColor: isOverBudget ? 'rgba(239,68,68,0.1)' : `${cat?.color || '#10b981'}1a`,
+                      color: isOverBudget ? '#ef4444' : (cat?.color || '#10b981'),
+                    }}
                   >
-                    {cat?.icon || '💵'}
+                    <CategoryIcon icon={cat?.icon || ''} size={20} />
                   </div>
                   <div>
                     <h4 className="font-bold text-[var(--text-primary)]">{budget.name}</h4>
                     <p className="text-xs text-[var(--text-muted)] capitalize">{budget.period} • {cat?.name || 'Unknown'}</p>
                   </div>
                 </div>
-                <button onClick={() => deleteBudget(budget.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors">
+                <button onClick={() => { if (confirm('Delete this budget?')) deleteBudget(budget.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors">
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -113,13 +116,13 @@ export default function Budgets() {
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold">{formatKSh(spent)} spent</span>
-                <span className="text-sm text-[var(--text-muted)]">{formatKSh(budget.amount)} limit</span>
+                <span className="text-sm font-semibold">{formatAmount(spent)} spent</span>
+                <span className="text-sm text-[var(--text-muted)]">{formatAmount(budget.amount)} limit</span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[var(--text-muted)]">
-                  {formatKSh(remaining)} remaining
+                  {formatAmount(remaining)} remaining
                 </span>
                 {isOverBudget ? (
                   <span className="flex items-center gap-1 text-xs font-medium text-red-500">

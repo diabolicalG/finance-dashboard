@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { Trash2, ArrowUpDown, Plus, X, Save } from 'lucide-react';
-import { formatKSh } from '../utils/currency';
+import { Trash2, ArrowUp, ArrowDown, Plus, X, Save } from 'lucide-react';
 import type { TransactionType } from '../types';
 
 export default function Transactions() {
-  const { transactions, categories, deleteTransaction, addTransaction } = useFinance();
+  const { transactions, categories, deleteTransaction, addTransaction, formatAmount, currencySymbol } = useFinance();
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [sortField, setSortField] = useState<'date' | 'amount'>('date');
   const [sortAsc, setSortAsc] = useState(false);
@@ -71,7 +70,7 @@ export default function Transactions() {
             />
             <input
               type="number"
-              placeholder="Amount (KSh)"
+              placeholder={`Amount (${currencySymbol})`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="input-field"
@@ -123,11 +122,11 @@ export default function Transactions() {
         </div>
         <div className="card">
           <p className="text-sm text-[var(--text-muted)]">Income</p>
-          <p className="text-2xl font-bold text-green-500 mt-1">{formatKSh(incomeTotal)}</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">{formatAmount(incomeTotal)}</p>
         </div>
         <div className="card">
           <p className="text-sm text-[var(--text-muted)]">Expenses</p>
-          <p className="text-2xl font-bold text-red-500 mt-1">{formatKSh(expenseTotal)}</p>
+          <p className="text-2xl font-bold text-red-500 mt-1">{formatAmount(expenseTotal)}</p>
         </div>
       </div>
 
@@ -150,16 +149,22 @@ export default function Transactions() {
         </div>
         <div className="flex gap-2 ml-auto">
           <button
-            onClick={() => { setSortField('date'); setSortAsc(false); }}
-            className={`btn-secondary flex items-center gap-2 ${sortField === 'date' && !sortAsc ? 'bg-blue-500/10 border-blue-500/50 text-blue-500' : ''}`}
+            onClick={() => {
+              if (sortField === 'date') setSortAsc((prev) => !prev);
+              else { setSortField('date'); setSortAsc(false); }
+            }}
+            className={`btn-secondary flex items-center gap-2 ${sortField === 'date' ? 'bg-blue-500/10 border-blue-500/50 text-blue-500' : ''}`}
           >
-            <ArrowUpDown size={14} /> Date
+            {sortField === 'date' && sortAsc ? <ArrowUp size={14} /> : <ArrowDown size={14} />} Date
           </button>
           <button
-            onClick={() => { setSortField('amount'); setSortAsc(false); }}
-            className={`btn-secondary flex items-center gap-2 ${sortField === 'amount' && !sortAsc ? 'bg-blue-500/10 border-blue-500/50 text-blue-500' : ''}`}
+            onClick={() => {
+              if (sortField === 'amount') setSortAsc((prev) => !prev);
+              else { setSortField('amount'); setSortAsc(false); }
+            }}
+            className={`btn-secondary flex items-center gap-2 ${sortField === 'amount' ? 'bg-blue-500/10 border-blue-500/50 text-blue-500' : ''}`}
           >
-            <ArrowUpDown size={14} /> Amount
+            {sortField === 'amount' && sortAsc ? <ArrowUp size={14} /> : <ArrowDown size={14} />} Amount
           </button>
         </div>
       </div>
@@ -200,11 +205,11 @@ export default function Transactions() {
                     </td>
                     <td className="py-3 px-4 text-sm text-[var(--text-muted)]">{txn.date}</td>
                     <td className={`py-3 px-4 text-sm font-semibold text-right ${txn.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-                      {txn.type === 'income' ? '+' : '-'}{formatKSh(txn.amount)}
+                      {txn.type === 'income' ? '+' : '-'}{formatAmount(txn.amount)}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <button
-                        onClick={() => deleteTransaction(txn.id)}
+                        onClick={() => { if (confirm('Delete this transaction?')) deleteTransaction(txn.id); }}
                         className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
                       >
                         <Trash2 size={16} />

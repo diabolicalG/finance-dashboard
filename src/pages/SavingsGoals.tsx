@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Plus, Trash2, TrendingUp, CheckCircle2 } from 'lucide-react';
-import { formatKSh } from '../utils/currency';
 
 export default function SavingsGoals() {
-  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useFinance();
+  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal, formatAmount, currencySymbol } = useFinance();
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
@@ -48,8 +47,8 @@ export default function SavingsGoals() {
           <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-700" style={{ width: `${overallProgress}%` }} />
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-sm font-semibold text-[var(--text-primary)]">{formatKSh(totalCurrent)}</span>
-          <span className="text-sm text-[var(--text-muted)]">of {formatKSh(totalTarget)}</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)]">{formatAmount(totalCurrent)}</span>
+          <span className="text-sm text-[var(--text-muted)]">of {formatAmount(totalTarget)}</span>
           <span className="text-sm font-semibold text-blue-500">{overallProgress.toFixed(1)}%</span>
         </div>
       </div>
@@ -68,7 +67,7 @@ export default function SavingsGoals() {
             />
             <input
               type="number"
-              placeholder="Target Amount (KSh)"
+              placeholder={`Target Amount (${currencySymbol})`}
               value={newTarget}
               onChange={(e) => setNewTarget(e.target.value)}
               className="input-field"
@@ -115,7 +114,7 @@ export default function SavingsGoals() {
                     <p className="text-xs text-[var(--text-muted)]">Deadline: {goal.deadline}</p>
                   </div>
                 </div>
-                <button onClick={() => deleteSavingsGoal(goal.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors">
+                <button onClick={() => { if (confirm('Delete this savings goal?')) deleteSavingsGoal(goal.id); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors">
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -128,14 +127,14 @@ export default function SavingsGoals() {
               </div>
 
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold">{formatKSh(goal.current)} / {formatKSh(goal.target)}</span>
+                <span className="text-sm font-semibold">{formatAmount(goal.current)} / {formatAmount(goal.target)}</span>
                 <span className="text-sm font-semibold" style={{ color: goal.color }}>{progress.toFixed(0)}%</span>
               </div>
 
               <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder="Add KSh funds"
+                  placeholder={`Add ${currencySymbol} funds`}
                   className="input-field flex-1"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -167,7 +166,7 @@ export default function SavingsGoals() {
                 </div>
               )}
               {progress < 100 && (
-                <p className="mt-2 text-xs text-[var(--text-muted)]">{formatKSh(remaining)} remaining</p>
+                <p className="mt-2 text-xs text-[var(--text-muted)]">{formatAmount(remaining)} remaining</p>
               )}
             </div>
           );

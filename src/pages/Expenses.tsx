@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { Trash2, Search, Plus, X, Save } from 'lucide-react';
-import { formatKSh } from '../utils/currency';
+import { CategoryIcon } from '../utils/categoryIcons';
 
 export default function Expenses() {
-  const { transactions, categories, deleteTransaction, addTransaction } = useFinance();
+  const { transactions, categories, deleteTransaction, addTransaction, formatAmount, currencySymbol } = useFinance();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [desc, setDesc] = useState('');
@@ -71,7 +71,7 @@ export default function Expenses() {
             />
             <input
               type="number"
-              placeholder="Amount (KSh)"
+              placeholder={`Amount (${currencySymbol})`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="input-field"
@@ -108,7 +108,7 @@ export default function Expenses() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card">
           <p className="text-sm text-[var(--text-muted)]">Total Expenses</p>
-          <p className="text-2xl font-bold text-red-500 mt-1">{formatKSh(totalExpenses)}</p>
+          <p className="text-2xl font-bold text-red-500 mt-1">{formatAmount(totalExpenses)}</p>
         </div>
         <div className="card">
           <p className="text-sm text-[var(--text-muted)]">Transactions</p>
@@ -116,7 +116,7 @@ export default function Expenses() {
         </div>
         <div className="card">
           <p className="text-sm text-[var(--text-muted)]">Average</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">{formatKSh(avgExpense)}</p>
+          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">{formatAmount(avgExpense)}</p>
         </div>
       </div>
 
@@ -141,12 +141,12 @@ export default function Expenses() {
             return (
               <div key={catId} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
                 <div className="flex items-center gap-2">
-                  {cat && (
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                  )}
-                  <span className="text-sm font-medium">{cat?.name || catId}</span>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${cat?.color || '#94a3b8'}20`, color: cat?.color || '#94a3b8' }}>
+                    <CategoryIcon icon={cat?.icon || ''} size={14} />
+                  </div>
+                  <span className="text-sm font-medium">{cat?.name || 'Uncategorized'}</span>
                 </div>
-                <span className="text-sm font-semibold">{formatKSh(amt)}</span>
+                <span className="text-sm font-semibold">{formatAmount(amt)}</span>
               </div>
             );
           })}
@@ -179,10 +179,10 @@ export default function Expenses() {
                         {cat?.name || txn.category}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-sm font-semibold text-right text-red-500">-{formatKSh(txn.amount)}</td>
+                    <td className="py-3 px-4 text-sm font-semibold text-right text-red-500">-{formatAmount(txn.amount)}</td>
                     <td className="py-3 px-4 text-right">
                       <button
-                        onClick={() => deleteTransaction(txn.id)}
+                        onClick={() => { if (confirm('Delete this expense?')) deleteTransaction(txn.id); }}
                         className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
                       >
                         <Trash2 size={16} />
